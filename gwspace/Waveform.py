@@ -271,14 +271,15 @@ class BHBWaveformEcc(BasicWaveform):
         return 5**(3/8)/(8*np.pi) * (MTSUN_SI*self.Mc)**(-5/8) * self.T_obs**(-3/8)
 
     def wave_para(self):
-        args = {'mass1': self.mass1*MSUN_SI,
-                'mass2': self.mass2*MSUN_SI,
-                'distance': self.DL*MPC_SI,
-                'coa_phase': self.phi_c,
-                'inclination': self.iota,
-                'long_asc_nodes': self.var_phi,
-                'eccentricity': self.eccentricity}
-        return args
+        return {
+            'mass1': self.mass1 * MSUN_SI,
+            'mass2': self.mass2 * MSUN_SI,
+            'distance': self.DL * MPC_SI,
+            'coa_phase': self.phi_c,
+            'inclination': self.iota,
+            'long_asc_nodes': self.var_phi,
+            'eccentricity': self.eccentricity,
+        }
 
     def gen_ori_waveform(self, delta_f=None, f_min=None, f_max=1., hphc=False):
         """Generate f-domain TDI waveform(EccentricFD)"""
@@ -357,10 +358,7 @@ class GCBWaveform(BasicWaveform):
                          * f0**(11/3))
         else:
             self.fdot = fdot
-        if fddot is None:
-            self.fddot = 11/3*self.fdot**2/f0
-        else:
-            self.fddot = fddot
+        self.fddot = 11/3*self.fdot**2/f0 if fddot is None else fddot
         self.amp = 2*(G_SI*self.Mc*MSUN_SI)**(5/3)
         self.amp = self.amp/C_SI**4/(DL*MPC_SI)
         self.amp = self.amp*(PI*f0)**(2/3)

@@ -36,7 +36,7 @@ def generate_td_data(pars, s_type='gcb', det='TQ', show_y_slr=False):
 
     if show_y_slr:
         tags = [(1, 2), (2, 1), (2, 3), (3, 2), (3, 1), (1, 3)]
-        for i, tag in enumerate(tags):
+        for tag in tags:
             plt.figure()
             for j in range(4):
                 plt.subplot(4, 1, j+1)

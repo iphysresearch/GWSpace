@@ -32,7 +32,7 @@ def test_sYlm():
 
             print(r"[%2d]sYlm[(%2d,%2d)] = %s <---> %s" % (s, l, m, y1, y2))
             print("-"*50)
-            print(r"Time cost for 1 and 2 is %s & %s" % (ed1-st1, ed2-st2))
+            print(f"Time cost for 1 and 2 is {ed1 - st1} & {ed2 - st2}")
             print("="*50)
 
 

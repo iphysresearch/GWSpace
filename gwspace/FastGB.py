@@ -88,10 +88,6 @@ class FastGB:
                 Xf = XSL
                 Yf = YSL
                 Zf = ZSL
-        else:
-            # FIXME
-            pass
-
         f0 = self.Frequency
         # f0 = self.Frequency + 0.5 * self.FrequencyDerivative * T
         if buffer is None:
@@ -121,22 +117,26 @@ class FastGB:
                 length=None, status=True):
         if np.any(table) is None:
             return self.onefourier(simulator=simulator, T=T, dt=dt, algorithm=algorithm, oversample=oversample)
-        else:
-            if length is None:
-                length = int(0.5*T/dt)+1  # was "NFFT = int(T/dt)", and "NFFT/2+1" passed to numpy.zeros
+        if length is None:
+            length = int(0.5*T/dt)+1  # was "NFFT = int(T/dt)", and "NFFT/2+1" passed to numpy.zeros
 
             # length = int(length)
             # print ("Stas", type(length), type(kmin), type(1.0/T))
-            buf = tuple(FrequencyArray(np.zeros(length, dtype=np.complex128), kmin=kmin, df=1.0/T) for i in range(3))
+        buf = tuple(
+            FrequencyArray(
+                np.zeros(length, dtype=np.complex128), kmin=kmin, df=1.0 / T
+            )
+            for _ in range(3)
+        )
 
-            if status: c = countdown(len(table), 10000)
-            for line in table:
-                self.onefourier(simulator=simulator, params=line, buffer=buf, T=T, dt=dt, algorithm=algorithm,
-                                oversample=oversample)
-                if status: c.status()
-            if status: c.end()
+        if status: c = countdown(len(table), 10000)
+        for line in table:
+            self.onefourier(simulator=simulator, params=line, buffer=buf, T=T, dt=dt, algorithm=algorithm,
+                            oversample=oversample)
+            if status: c.status()
+        if status: c.end()
 
-            return buf
+        return buf
 
     def TDI(self, T=6.2914560e7, dt=15.0, simulator='synthlisa', table=None, algorithm='mldc', oversample=1):
         X, Y, Z = self.fourier(simulator, table, T=T, dt=dt, algorithm=algorithm, oversample=oversample)

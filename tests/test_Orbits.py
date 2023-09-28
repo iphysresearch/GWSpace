@@ -85,8 +85,7 @@ def get_centre(x, y, z):
 
 def get_theta(a, b, la, lb):
     costheta = (a[0]*b[0]+a[1]*b[1]+a[2]*b[2])/la/lb
-    theta = np.arccos(costheta)
-    return theta
+    return np.arccos(costheta)
 
 
 def get_norm(a):

@@ -59,7 +59,7 @@ class SGWB(object):
         alms_inj = self.blm_2_alm(self.blms)
         alms_inj2 = alms_inj/(alms_inj[0] * np.sqrt(4*np.pi))
         ## extrct only the non-negative components
-        alms_non_neg = alms_inj2[0:hp.Alm.getsize(self.almax)]
+        alms_non_neg = alms_inj2[:hp.Alm.getsize(self.almax)]
 
         self.skymap_inj = hp.alm2map(alms_non_neg, self.nside_in)
         self.frange = np.linspace(self.fmin,self.fmax,self.fn)
@@ -123,7 +123,7 @@ class SGWB(object):
             if mval >= 0:
                 blms_full[jj] = blms_in[Alm.getidx(self.blmax, lval, mval)]
 
-            elif mval < 0:
+            else:
                 mval = -mval
                 blms_full[jj] = (-1)**mval *  np.conj(blms_in[Alm.getidx(self.blmax, lval, mval)])
 
@@ -138,9 +138,7 @@ class SGWB(object):
         ## convert blm array into a full blm array with -m values too
         blm_full = self.calc_blm_full(blms_in)
 
-        alm_vals = np.einsum('ijk,j,k', beta_vals,blm_full,blm_full)
-   
-        return alm_vals
+        return np.einsum('ijk,j,k', beta_vals,blm_full,blm_full)
     def idxtoalm(self, lmax, ii):
 
         '''

@@ -11,7 +11,7 @@ class FrequencyArray(np.ndarray):
     Class to manage array in frequency domain based numpy array class
     """
 
-    def __new__(subtype, data, dtype=None, copy=False, df=None, kmin=None):
+    def __new__(cls, data, dtype=None, copy=False, df=None, kmin=None):
         """
         ...
         @param data is ... [required]
@@ -24,7 +24,7 @@ class FrequencyArray(np.ndarray):
         # make sure we are working with an array, copy the data if requested,
         # then transform the array to our new subclass
         subarr = np.array(data, dtype=dtype, copy=copy)
-        subarr = subarr.view(subtype)
+        subarr = subarr.view(cls)
 
         # get df and kmin preferentially from the initialization,
         # then from the data object, otherwise set to None
@@ -72,7 +72,7 @@ class FrequencyArray(np.ndarray):
         @return
         """
         if self.df is not None:
-            return 'Frequency array (f0=%s,df=%s): %s' % (self.kmin*self.df, self.df, self)
+            return f'Frequency array (f0={self.kmin * self.df},df={self.df}): {self}'
         else:
             return str(self)
 
@@ -126,14 +126,13 @@ class FrequencyArray(np.ndarray):
         if isinstance(other, FrequencyArray) and (self.df == other.df):
             if other.kmin >= self.kmin+len(self) or self.kmin >= other.kmin+len(other):
                 return self
-            else:
-                beg = max(self.kmin, other.kmin)
-                end = min(self.kmin+len(self), other.kmin+len(other))
+            beg = max(self.kmin, other.kmin)
+            end = min(self.kmin+len(self), other.kmin+len(other))
 
-                ret = np.array(self, copy=True, dtype=np.find_common_type([self.dtype, other.dtype], []))
-                ret[(beg-self.kmin):(end-self.kmin)] -= other[(beg-other.kmin):(end-other.kmin)]
+            ret = np.array(self, copy=True, dtype=np.find_common_type([self.dtype, other.dtype], []))
+            ret[(beg-self.kmin):(end-self.kmin)] -= other[(beg-other.kmin):(end-other.kmin)]
 
-                return FrequencyArray(ret, kmin=self.kmin, df=self.df)
+            return FrequencyArray(ret, kmin=self.kmin, df=self.df)
 
         return np.ndarray.__sub__(self, other)
 
@@ -181,12 +180,11 @@ class FrequencyArray(np.ndarray):
 
             if beg >= end:
                 return 0.0
-            else:
-                ret = np.array(self[(beg-self.kmin):(end-self.kmin)], copy=True,
-                               dtype=np.find_common_type([self.dtype, other.dtype], []))
-                ret *= other[(beg-other.kmin):(end-other.kmin)]
+            ret = np.array(self[(beg-self.kmin):(end-self.kmin)], copy=True,
+                           dtype=np.find_common_type([self.dtype, other.dtype], []))
+            ret *= other[(beg-other.kmin):(end-other.kmin)]
 
-                return FrequencyArray(ret, kmin=beg, df=self.df)
+            return FrequencyArray(ret, kmin=beg, df=self.df)
 
         # fall back to simple arrays (may waste memory)
         return np.ndarray.__mul__(self, other)
@@ -200,9 +198,8 @@ class FrequencyArray(np.ndarray):
         if isinstance(other, FrequencyArray) and (self.df == other.df):
             if (other.kmin > self.kmin) or (other.kmin+len(other) < self.kmin+len(self)):
                 raise ZeroDivisionError
-            else:
-                ret = np.array(self, copy=True, dtype=np.find_common_type([self.dtype, other.dtype], []))
-                ret /= other[(self.kmin-other.kmin):(self.kmin-other.kmin+len(self))]
+            ret = np.array(self, copy=True, dtype=np.find_common_type([self.dtype, other.dtype], []))
+            ret /= other[(self.kmin-other.kmin):(self.kmin-other.kmin+len(self))]
 
             return FrequencyArray(ret, kmin=self.kmin, df=self.df)
 
