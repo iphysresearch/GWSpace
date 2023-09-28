@@ -3,6 +3,7 @@
 # wangh657@mail2.sysu.edu.cn
 
 """connect to EccFD library"""
+
 import os
 from numpy import float64, complex128, frombuffer, pi, array, zeros
 from scipy.interpolate import InterpolatedUnivariateSpline as Spline
@@ -14,9 +15,9 @@ if _dirname == '':
     _dirname = '.'
 
 try:
-    _rlib = cdll.LoadLibrary(_dirname+"/libEccFD.so")
+    _rlib = cdll.LoadLibrary(f"{_dirname}/libEccFD.so")
 except OSError:
-    so_file = glob.glob(_dirname + "/libEccFD*.so")
+    so_file = glob.glob(f"{_dirname}/libEccFD*.so")
     _rlib = cdll.LoadLibrary(so_file[0])
 
 

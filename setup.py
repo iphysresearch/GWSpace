@@ -25,8 +25,8 @@ for arg in sys.argv:
 
 sys.argv = argv_replace
 
-lib_gsl_dir = gsl_prefix+"/lib"
-include_gsl_dir = gsl_prefix+"/include"
+lib_gsl_dir = f"{gsl_prefix}/lib"
+include_gsl_dir = f"{gsl_prefix}/include"
 
 # Update these paths accordingly
 
@@ -36,10 +36,9 @@ code_lib = 'gwspace'
 
 def func_ext(name, src):
     return Extension(
-        code_lib+"."+name,
+        f"{code_lib}.{name}",
         sources=src,
-        include_dirs=["include",
-                      include_gsl_dir, np.get_include()],
+        include_dirs=["include", include_gsl_dir, np.get_include()],
         extra_compile_args=["-std=c99", "-O3"],
         libraries=['gsl', 'gslcblas', 'm'],
         library_dirs=[lib_gsl_dir],
@@ -67,11 +66,7 @@ imrphd_ext = func_ext('pyIMRPhenomD',
                       ])
 
 # add all extensions
-extensions = []
-extensions.append(fastgb_ext)
-extensions.append(eccfd_ext)
-extensions.append(imrphd_ext)
-
+extensions = [fastgb_ext, eccfd_ext, imrphd_ext]
 # translate the Constants.h to Constants.py
 fp_const_h = "./include/Constants.h"
 fp_const_py = "./gwspace/Constants.py"
@@ -84,7 +79,7 @@ with open(fp_const_h, "r") as fp_in:
                 if line.split()[0] == "#define":
                     try:
                         _ = float(line.split()[2])
-                        string_out = line.split()[1] + " = " + line.split()[2] + "\n"
+                        string_out = f"{line.split()[1]} = {line.split()[2]}" + "\n"
                         fp_out.write(string_out)
 
                     except ValueError as e:

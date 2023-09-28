@@ -148,8 +148,10 @@ def _cal_xi(tf,k,r):
 
 def get_yslr(tf, freq, u,v,k, wf, detector="TianQin"):
     xt,yt,zt,LT = get_pos(tf, detector)
-    ni = lambda i,j: np.array([xt[j]-xt[i], yt[j]-yt[i], zt[j]-zt[i]])/LT    
-    n1 = ni(2,1); n2 = ni(0,2); n3 = ni(1,0)
+    ni = lambda i,j: np.array([xt[j]-xt[i], yt[j]-yt[i], zt[j]-zt[i]])/LT
+    n1 = ni(2,1)
+    n2 = ni(0,2)
+    n3 = ni(1,0)
     kn1 = _dot_arr(k,n1)
     kn2 = _dot_arr(k,n2)
     kn3 = _dot_arr(k,n3)
@@ -175,22 +177,22 @@ def get_yslr(tf, freq, u,v,k, wf, detector="TianQin"):
     exp31 = np.exp(-1j*np.pi*freq*(LT+kr3+kr1))
 
     yslr = {}
-    for i in range(4):        
+    for i in range(4):    
         ts = tf - i*LT
         hp, hc = wf.get_hphc(ts)
-        cspsi = np.cos(2*wf.psi) 
+        cspsi = np.cos(2*wf.psi)
         snpsi = np.sin(2*wf.psi)
         hp, hc = (hp*cspsi -hc*snpsi, hp*snpsi+hc*cspsi)
 
         fact = -1j*np.pi*freq*LT * np.exp(1j*2*np.pi*freq*LT*i)
-        
-        yslr["%sL"%i] = {
-            (1,2): fact*sinc12*exp12, #*(zp3*hp + zc3*hc),
-            (2,1): fact*sinc21*exp12*(zp3*hp + zc3*hc),
-            (2,3): fact*sinc23*exp23*(zp1*hp + zc1*hc),
-            (3,2): fact*sinc32*exp23*(zp1*hp + zc1*hc),
-            (3,1): fact*sinc31*exp31*(zp2*hp + zc2*hc),
-            (1,3): fact*sinc13*exp31*(zp2*hp + zc2*hc),
+
+        yslr[f"{i}L"] = {
+            (1, 2): fact * sinc12 * exp12,  # *(zp3*hp + zc3*hc),
+            (2, 1): fact * sinc21 * exp12 * (zp3 * hp + zc3 * hc),
+            (2, 3): fact * sinc23 * exp23 * (zp1 * hp + zc1 * hc),
+            (3, 2): fact * sinc32 * exp23 * (zp1 * hp + zc1 * hc),
+            (3, 1): fact * sinc31 * exp31 * (zp2 * hp + zc2 * hc),
+            (1, 3): fact * sinc13 * exp31 * (zp2 * hp + zc2 * hc),
         }
     return yslr
 
@@ -208,10 +210,7 @@ class GCBWaveformFD(BasicWaveform):
                          * f0**(11/3))
         else:
             self.fdot = fdot
-        if fddot is None:
-            self.fddot = 11/3*self.fdot**2/f0
-        else:
-            self.fddot = fddot
+        self.fddot = 11/3*self.fdot**2/f0 if fddot is None else fddot
         self.amp = 2*(G_SI*self.Mc*MSUN_SI)**(5/3)
         self.amp = self.amp/C_SI**4/(DL*MPC_SI)
         self.amp = self.amp*(PI*f0)**(2/3)
@@ -220,7 +219,7 @@ class GCBWaveformFD(BasicWaveform):
         phase = 2*PI*(self.f0+0.5*self.fdot*t +
                       1/6*self.fddot*t*t)*t+self.phi0
         csi = cos(self.iota)
-        if freq == None:
+        if freq is None:
             freq = self.f0 + self.fdot*tf
         return self.amp*np.exp(1j*2*np.pi*freq*tf)
 

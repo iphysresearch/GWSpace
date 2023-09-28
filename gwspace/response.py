@@ -155,23 +155,22 @@ def get_XYZ_td(y_slr, TDIgen=1):
     Parameters
     ----------
     """
+    if TDIgen != 1:
+        raise NotImplementedError
+
     y31 = y_slr[(3, 1)]
     y13 = y_slr[(1, 3)]
     y12 = y_slr[(1, 2)]
     y21 = y_slr[(2, 1)]
+    X = (y31[0]+y13[1]+y21[2]+y12[3]
+         - y21[0]-y12[1]-y31[2]-y13[3])
     y23 = y_slr[(2, 3)]
     y32 = y_slr[(3, 2)]
 
-    if TDIgen == 1:
-        X = (y31[0]+y13[1]+y21[2]+y12[3]
-             - y21[0]-y12[1]-y31[2]-y13[3])
-        Y = (y12[0]+y21[1]+y32[2]+y23[3]
-             - y32[0]-y23[1]-y12[2]-y21[3])
-        Z = (y23[0]+y32[1]+y13[2]+y31[3]
-             - y13[0]-y31[1]-y23[2]-y32[3])
-    else:
-        raise NotImplementedError
-
+    Y = (y12[0]+y21[1]+y32[2]+y23[3]
+         - y32[0]-y23[1]-y12[2]-y21[3])
+    Z = (y23[0]+y32[1]+y13[2]+y31[3]
+         - y13[0]-y31[1]-y23[2]-y32[3])
     return X, Y, Z
 
 

@@ -36,10 +36,7 @@ class parameter(object):
 
     def __init__(self, value, unit="1", toSeconds=False):
         self.unit = unit
-        if toSeconds:
-            self.value = value*ParsValue2Second[unit]()
-        else:
-            self.value = value
+        self.value = value*ParsValue2Second[unit]() if toSeconds else value
 
     def __call__(self):
         return self.value
@@ -132,13 +129,9 @@ def readvalue(pars, so, s1):
 
     # print('the unit of %s is %s'%(ss, unit))
 
-    if type(ss) is list:
-        fs = np.array([float(s) for s in ss])
-    else:
-        fs = float(ss)
-
+    fs = np.array([float(s) for s in ss]) if type(ss) is list else float(ss)
     # degree to radian
-    if unit == 'degree' or unit == 'deg':
+    if unit in ['degree', 'deg']:
         fs = deg2rad(fs)
     elif (unit is None) or unit == 'radian' or unit == 'm' or unit == 's':
         return fs
@@ -162,13 +155,9 @@ def readvalue_dict(pars, so):
 
     # print('the unit of %s is %s'%(ss, unit))
 
-    if type(ss) is list:
-        fs = np.array([float(s) for s in ss])
-    else:
-        fs = float(ss)
-
+    fs = np.array([float(s) for s in ss]) if type(ss) is list else float(ss)
     # degree to radian
-    if unit == 'degree' or unit == 'deg':
+    if unit in ['degree', 'deg']:
         fs = deg2rad(fs)
     elif unit is None or unit == 'radian' or unit == 'm' or unit == 's':
         return fs
@@ -254,7 +243,7 @@ def Rotation_3D(axis, theta):
     Return:
         3x3 matrix
     """
-    if axis == 2 or axis == 'y':
+    if axis in [2, 'y']:
         ii = -1
     elif axis == 'x':
         ii = 0
@@ -290,7 +279,7 @@ def dfridr(func, x, h, err=1e-14, *args):
         so far.
     """
     CON = 1.4
-    CON2 = CON*CON
+    CON2 = CON**2
     BIG = 1e30
     NTAB = 10
     SAFE = 2.0
@@ -335,7 +324,7 @@ def QuadLagrange3(x, y):
         http://mathonline.wikidot.com/quadratic-lagrange-interpolating-polynomials
     """
     res = np.zeros(3, dtype=y.dtype)
-    if (not len(x) == 3) or (not len(y) == 3):
+    if len(x) != 3 or len(y) != 3:
         raise ValueError('Only allows an input length of 3 for x and y.')
     c0 = y[0]/((x[0]-x[1])*(x[0]-x[2]))
     c1 = y[1]/((x[1]-x[0])*(x[1]-x[2]))
@@ -367,7 +356,7 @@ def spin_weighted_spherical_harmonic(s, l, m, theta, phi):
         raise ValueError('Error - %s: Invalid mode s=%d, l=%d, m=%d - require |s| <= l\n' % (func, s, l, m))
     if l < abs(m):
         raise ValueError('Error - %s: Invalid mode s=%d, l=%d, m=%d - require |m| <= l\n' % (func, s, l, m))
-    if not (s == -2):
+    if s != -2:
         raise ValueError('Error - %s: Invalid mode s=%d - only s=-2 implemented\n' % (func, s))
 
     fac = {
@@ -412,10 +401,7 @@ def spin_weighted_spherical_harmonic(s, l, m, theta, phi):
         raise ValueError('Error - %s: Invalid mode s=%d, l=%d, m=%d - require |m| <= l\n' % (func, s, l, m))
 
     # Result
-    if m == 0:
-        return fac
-    else:
-        return fac*exp(1j*m*phi)
+    return fac if m == 0 else fac*exp(1j*m*phi)
 
 
 # factorial
@@ -448,11 +434,7 @@ def BinomialCoefficient(n, k):
     Refs:
     https://mathworld.wolfram.com/BinomialCoefficient.html
     """
-    if 0 <= k <= n:
-        return Factorial(n)/Factorial(k)/Factorial(n-k)
-    # else:
-    #    print("%d is not less than %d, or %d is smaller than 0\n"%(k, n, k))
-    return 0
+    return Factorial(n)/Factorial(k)/Factorial(n-k) if 0 <= k <= n else 0
 
 
 # spin-weighted spherical harmonics
@@ -519,9 +501,7 @@ def epsilon(i, j, k):
     if k < j: ss += 1
     if k < i: ss += 1
     sp = ss % 2
-    if sp == 0:
-        return 1
-    return -1
+    return 1 if sp == 0 else -1
 
 
 class countdown(object):
@@ -539,9 +519,8 @@ class countdown(object):
     def pad(self, outstring):
         if len(outstring) < self.longest:
             return outstring+" "*(self.longest-len(outstring))
-        else:
-            self.longest = len(outstring)
-            return outstring
+        self.longest = len(outstring)
+        return outstring
 
     def status(self, local=False, status=None):
         self.items = self.items+1
@@ -563,10 +542,22 @@ class countdown(object):
         self.tlast = t
         self.ilast = self.items
 
-        print(self.pad("\r%d/%d done, %d s elapsed (%f/s), ETA %d s%s" % (self.items, self.total, t-self.t0,
-                                                                          localspeed if local else speed,
-                                                                          localeta if local else eta,
-                                                                          ", "+status if status else "")), end=' ')
+        print(
+            self.pad(
+                (
+                    "\r%d/%d done, %d s elapsed (%f/s), ETA %d s%s"
+                    % (
+                        self.items,
+                        self.total,
+                        t - self.t0,
+                        localspeed if local else speed,
+                        localeta if local else eta,
+                        f", {status}" if status else "",
+                    )
+                )
+            ),
+            end=' ',
+        )
         sys.stdout.flush()
 
     def end(self, status=None):
@@ -574,12 +565,16 @@ class countdown(object):
 
         speed = self.items/(t-self.t0)
 
-        print(self.pad(
-            "\r%d finished, %d s elapsed (%d/s)%s" % (self.items, t-self.t0, speed, ", "+status if status else "")))
+        print(
+            self.pad(
+                "\r%d finished, %d s elapsed (%d/s)%s"
+                % (self.items, t - self.t0, speed, f", {status}" if status else "")
+            )
+        )
         sys.stdout.flush()
 
 
 if __name__ == '__main__':
     Larm = parameter(value=10, unit="m", toSeconds=True)
-    print("Unit of Larm is %s" % Larm.unit)
+    print(f"Unit of Larm is {Larm.unit}")
     print("value of Larm is %e" % Larm.value)
